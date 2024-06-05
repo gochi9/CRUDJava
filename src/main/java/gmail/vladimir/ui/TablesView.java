@@ -7,8 +7,6 @@ import org.jdatepicker.impl.UtilDateModel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -17,26 +15,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-public class CRUDView extends JFrame {
-    private UserService userService;
-    private String tableName;
-    private String databaseName;
-    private String url;
-    private String port;
-    private String username;
-    private Map<String, String> tableSchema;
-    private String primaryKeyColumn;
+public class TablesView extends JFrame {
 
-    private JPanel dataPanel;
-    private JButton addButton;
+    private final UserService userService;
+    private final String tableName;
+    private final Map<String, String> tableSchema;
+    private final String primaryKeyColumn;
 
-    public CRUDView(UserService userService, String tableName, String databaseName, String url, String port, String username) throws SQLException {
+    private final JPanel dataPanel;
+
+    public TablesView(UserService userService, String tableName, String databaseName, String url, String port, String username) throws SQLException {
         this.userService = userService;
         this.tableName = tableName;
-        this.databaseName = databaseName;
-        this.url = url;
-        this.port = port;
-        this.username = username;
 
         setTitle("CRUD Operations for Table: " + tableName);
         setSize(800, 600);
@@ -44,7 +34,6 @@ public class CRUDView extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // Create a panel to display the database information
         JPanel infoPanel = new JPanel(new GridLayout(2, 1));
         JPanel dbInfoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         dbInfoPanel.add(new JLabel("Database: " + databaseName));
@@ -61,17 +50,12 @@ public class CRUDView extends JFrame {
         scrollPane.setPreferredSize(new Dimension(780, 500));
         add(scrollPane, BorderLayout.CENTER);
 
-        addButton = new JButton("Add Entry");
+        JButton addButton = new JButton("Add Entry");
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topPanel.add(addButton);
         infoPanel.add(topPanel);
 
-        addButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                openEntryForm(null);
-            }
-        });
+        addButton.addActionListener(e -> openEntryForm(null));
 
         tableSchema = userService.getTableSchema(tableName);
         primaryKeyColumn = tableSchema.keySet().iterator().next();
@@ -93,7 +77,6 @@ public class CRUDView extends JFrame {
             int buttonWidth = 75;
             int totalRowWidth = columnCount * baseCellWidth + 2 * buttonWidth + 30; // 30 for padding
 
-            // Create header row
             JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 2));
             headerPanel.setPreferredSize(new Dimension(totalRowWidth, 35));
             headerPanel.setBackground(Color.DARK_GRAY);
@@ -105,11 +88,9 @@ public class CRUDView extends JFrame {
                 headerPanel.add(headerLabel);
             }
 
-            // Add header to dataPanel
             dataPanel.add(headerPanel, gbc);
             gbc.gridy++;
 
-            // Add dark separator bar
             JSeparator darkSeparator = new JSeparator(SwingConstants.HORIZONTAL);
             darkSeparator.setBackground(Color.BLACK);
             darkSeparator.setPreferredSize(new Dimension(totalRowWidth, 5));
@@ -131,42 +112,34 @@ public class CRUDView extends JFrame {
                 JButton removeButton = new JButton("Remove");
                 removeButton.setPreferredSize(new Dimension(buttonWidth, 25));
 
-                editButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        openEntryForm(row);
-                    }
-                });
+                editButton.addActionListener(e -> openEntryForm(row));
 
-                removeButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        int confirmation = JOptionPane.showConfirmDialog(CRUDView.this, "Are you sure you want to delete this entry?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
-                        if (confirmation == JOptionPane.YES_OPTION) {
-                            try {
-                                userService.deleteData(tableName, primaryKeyColumn, row.get(primaryKeyColumn));
-                                refreshData();
-                            } catch (SQLException ex) {
-                                JOptionPane.showMessageDialog(CRUDView.this, "Error deleting entry: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                                ex.printStackTrace();
-                            }
+                removeButton.addActionListener(e -> {
+                    int confirmation = JOptionPane.showConfirmDialog(TablesView.this, "Are you sure you want to delete this entry?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+                    if (confirmation == JOptionPane.YES_OPTION) {
+                        try {
+                            userService.deleteData(tableName, primaryKeyColumn, row.get(primaryKeyColumn));
+                            refreshData();
+                        } catch (SQLException ex) {
+                            JOptionPane.showMessageDialog(TablesView.this, "Error deleting entry: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                            ex.printStackTrace();
                         }
                     }
                 });
 
                 rowPanel.add(editButton);
-                rowPanel.add(Box.createRigidArea(new Dimension(10, 0))); // Add space between buttons
+                rowPanel.add(Box.createRigidArea(new Dimension(10, 0)));
                 rowPanel.add(removeButton);
 
                 dataPanel.add(rowPanel, gbc);
                 gbc.gridy++;
-                gbc.fill = GridBagConstraints.HORIZONTAL; // Make the separator fill horizontally
-                dataPanel.add(new JSeparator(SwingConstants.HORIZONTAL), gbc); // Add separator line
+                gbc.fill = GridBagConstraints.HORIZONTAL;
+                dataPanel.add(new JSeparator(SwingConstants.HORIZONTAL), gbc);
                 gbc.gridy++;
             }
 
-            gbc.weighty = 1; // Push components to the top
-            dataPanel.add(new JPanel(), gbc); // Filler panel to ensure alignment to the top
+            gbc.weighty = 1;
+            dataPanel.add(new JPanel(), gbc);
 
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Error fetching data: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -196,14 +169,15 @@ public class CRUDView extends JFrame {
             gbc.gridx = 1;
             String type = tableSchema.get(column);
             JComponent inputField = getInputField(column, type, existingData != null);
-            if (existingData != null) {
-                if (inputField instanceof JTextField) {
+
+            if(existingData != null) {
+                if (inputField instanceof JTextField)
                     ((JTextField) inputField).setText(String.valueOf(existingData.get(column)));
-                } else if (inputField instanceof JCheckBox) {
+                else if (inputField instanceof JCheckBox)
                     ((JCheckBox) inputField).setSelected((Boolean) existingData.get(column));
-                } else if (inputField instanceof JSpinner) {
+                else if (inputField instanceof JSpinner)
                     ((JSpinner) inputField).setValue(existingData.get(column));
-                } else if (inputField instanceof JDatePickerImpl) {
+                else if (inputField instanceof JDatePickerImpl) {
                     java.util.Date selectedDate = (java.util.Date) existingData.get(column);
                     ((UtilDateModel) ((JDatePickerImpl) inputField).getModel()).setValue(selectedDate);
                 }
@@ -221,36 +195,33 @@ public class CRUDView extends JFrame {
         JButton saveButton = new JButton("Save");
         formPanel.add(saveButton, gbc);
 
-        saveButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Map<String, Object> newData = new HashMap<>();
-                for (String column : fieldMap.keySet()) {
-                    JComponent inputField = fieldMap.get(column);
-                    if (inputField instanceof JTextField) {
-                        newData.put(column, ((JTextField) inputField).getText());
-                    } else if (inputField instanceof JCheckBox) {
-                        newData.put(column, ((JCheckBox) inputField).isSelected());
-                    } else if (inputField instanceof JSpinner) {
-                        newData.put(column, ((JSpinner) inputField).getValue());
-                    } else if (inputField instanceof JDatePickerImpl) {
-                        java.util.Date selectedDate = (java.util.Date) ((JDatePickerImpl) inputField).getModel().getValue();
-                        newData.put(column, new SimpleDateFormat("yyyy-MM-dd").format(selectedDate));
-                    }
+        saveButton.addActionListener(e -> {
+            Map<String, Object> newData = new HashMap<>();
+            for (String column : fieldMap.keySet()) {
+                JComponent inputField = fieldMap.get(column);
+                if (inputField instanceof JTextField)
+                    newData.put(column, ((JTextField) inputField).getText());
+                else if (inputField instanceof JCheckBox)
+                    newData.put(column, ((JCheckBox) inputField).isSelected());
+                else if (inputField instanceof JSpinner)
+                    newData.put(column, ((JSpinner) inputField).getValue());
+                else if (inputField instanceof JDatePickerImpl) {
+                    java.util.Date selectedDate = (java.util.Date) ((JDatePickerImpl) inputField).getModel().getValue();
+                    newData.put(column, new SimpleDateFormat("yyyy-MM-dd").format(selectedDate));
                 }
+            }
 
-                try {
-                    if (existingData == null) {
-                        userService.insertData(tableName, newData);
-                    } else {
-                        userService.updateData(tableName, newData, primaryKeyColumn, existingData.get(primaryKeyColumn));
-                    }
-                    refreshData();
-                    dialog.dispose();
-                } catch (SQLException ex) {
-                    JOptionPane.showMessageDialog(dialog, "Error saving data: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                    ex.printStackTrace();
-                }
+            try {
+                if (existingData == null)
+                    userService.insertData(tableName, newData);
+                else
+                    userService.updateData(tableName, newData, primaryKeyColumn, existingData.get(primaryKeyColumn));
+
+                refreshData();
+                dialog.dispose();
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(dialog, "Error saving data: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
             }
         });
 
@@ -267,9 +238,9 @@ public class CRUDView extends JFrame {
                     JTextField field = new JTextField();
                     field.setEnabled(false); // Disable primary key field
                     return field;
-                } else {
-                    return new JSpinner(new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1));
                 }
+                else
+                    return new JSpinner(new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1));
             case "BOOLEAN":
                 return new JCheckBox();
             case "DATE":
@@ -284,8 +255,7 @@ public class CRUDView extends JFrame {
                 p.put("text.month", "Month");
                 p.put("text.year", "Year");
                 JDatePanelImpl datePanel = new JDatePanelImpl(model, p);
-                JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new org.jdatepicker.impl.DateComponentFormatter());
-                return datePicker;
+                return new JDatePickerImpl(datePanel, new org.jdatepicker.impl.DateComponentFormatter());
             case "DECIMAL":
                 return new JSpinner(new SpinnerNumberModel(0.0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 0.01));
             default:

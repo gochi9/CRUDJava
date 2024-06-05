@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.SQLException;
 
-public class LoginForm extends JFrame {
+public class LoginView extends JFrame {
 
     private final JTextField urlField;
     private final JTextField portField;
@@ -14,7 +14,7 @@ public class LoginForm extends JFrame {
     private final JTextField userField;
     private final JPasswordField passwordField;
 
-    public LoginForm(String defaultDatabase, String defaultURL, String defaultPort, String defaultUser) {
+    public LoginView(String defaultDatabase, String defaultURL, String defaultPort, String defaultUser) {
         setTitle("Database Login");
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -87,7 +87,7 @@ public class LoginForm extends JFrame {
                 connect(url, user, password);
             }
             catch (SQLException ex) {
-                JOptionPane.showMessageDialog(LoginForm.this, "Failed to connect to database: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(LoginView.this, "Failed to connect to database: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
