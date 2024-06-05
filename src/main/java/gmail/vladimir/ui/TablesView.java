@@ -70,12 +70,12 @@ public class TablesView extends JFrame {
             gbc.gridx = 0;
             gbc.gridy = 0;
             gbc.insets = new Insets(2, 2, 2, 2);
-            gbc.anchor = GridBagConstraints.NORTH; // Align to top
+            gbc.anchor = GridBagConstraints.NORTH;
 
             int columnCount = tableSchema.keySet().size();
             int baseCellWidth = 100;
             int buttonWidth = 75;
-            int totalRowWidth = columnCount * baseCellWidth + 2 * buttonWidth + 30; // 30 for padding
+            int totalRowWidth = columnCount * baseCellWidth + 2 * buttonWidth + 30;
 
             JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 2));
             headerPanel.setPreferredSize(new Dimension(totalRowWidth, 35));
@@ -98,7 +98,7 @@ public class TablesView extends JFrame {
             gbc.gridy++;
 
             for (Map<String, Object> row : data) {
-                JPanel rowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 2)); // Reduced spacing
+                JPanel rowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 2));
                 rowPanel.setPreferredSize(new Dimension(totalRowWidth, 35));
 
                 for (String column : tableSchema.keySet()) {
@@ -236,7 +236,7 @@ public class TablesView extends JFrame {
             case "INT":
                 if (column.equalsIgnoreCase(primaryKeyColumn)) {
                     JTextField field = new JTextField();
-                    field.setEnabled(false); // Disable primary key field
+                    field.setEnabled(false);
                     return field;
                 }
                 else
