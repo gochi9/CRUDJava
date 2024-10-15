@@ -212,10 +212,13 @@ public class TablesView extends JFrame {
             }
 
             try {
-                if (existingData == null)
+                if (existingData == null) {
+                    int totalEntries = userService.getTotalEntries(tableName);
+                    newData.put(primaryKeyColumn, totalEntries + 1);
                     userService.insertData(tableName, newData);
-                else
+                } else {
                     userService.updateData(tableName, newData, primaryKeyColumn, existingData.get(primaryKeyColumn));
+                }
 
                 refreshData();
                 dialog.dispose();

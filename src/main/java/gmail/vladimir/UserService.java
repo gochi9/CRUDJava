@@ -2,7 +2,7 @@ package gmail.vladimir;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +24,7 @@ public class UserService {
     }
 
     public Map<String, String> getTableSchema(String tableName) throws SQLException {
-        Map<String, String> schema = new HashMap<>();
+        Map<String, String> schema = new LinkedHashMap<>();
         try (ResultSet rs = connection.getMetaData().getColumns(null, null, tableName, null)) {
             while (rs.next())
                 schema.put(rs.getString("COLUMN_NAME"), rs.getString("TYPE_NAME"));
@@ -40,7 +40,7 @@ public class UserService {
             ResultSetMetaData rsMeta = rs.getMetaData();
             int columnCount = rsMeta.getColumnCount();
             while (rs.next()) {
-                Map<String, Object> row = new HashMap<>();
+                Map<String, Object> row = new LinkedHashMap<>();
 
                 for (int i = 1; i <= columnCount; i++)
                     row.put(rsMeta.getColumnName(i), rs.getObject(i));
@@ -86,6 +86,16 @@ public class UserService {
             stmt.setObject(1, primaryKeyValue);
             stmt.executeUpdate();
         }
+    }
+
+    public int getTotalEntries(String tableName) throws SQLException {
+        String query = "SELECT COUNT(*) FROM " + tableName;
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+            if (rs.next())
+                return rs.getInt(1);
+        }
+        return 0;
     }
 
     public void closeConnection() throws SQLException {
